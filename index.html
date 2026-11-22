@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WARGA PULAU LANGIT</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e1424">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pulau Langit">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="frame" id="fr">
+<div id="hud"><div id="net">⚪ Mode lokal (tanpa server) — pakai menu ☰</div><div id="hclk"></div><div id="recb" onclick="recStop()"></div>
+<div class="top"><h1>WARGA PULAU LANGIT</h1><div class="pill" id="stg"></div><div class="bar"><i id="bar"></i></div><div class="sm" id="prg"></div>
+<div class="panel"><div class="row"><span id="pop"></span><span id="hlt"></span><span id="kas"></span></div><div class="row r" id="res"></div></div></div>
+<div id="hint">👆 Geser = putar • cubit = zoom • 2 jari = geser<br>☰ Menu → Tambah Warga, Kamera Bebas, Rekam Layar</div>
+<div class="bot"><div class="panel" id="nxt"></div><div id="feed"></div><div class="slogan">SATU FOLLOW, SATU WARGA. SATU LIKE, SUMBER DAYA BERTAMBAH. SATU SHARE, KAS DESA BERTAMBAH. KITA BANGUN DESA INI BERSAMA!</div></div>
+</div>
+<button class="ib" id="mb" style="top:2cqw" onclick="menu(1)" aria-label="Menu">☰</button>
+<button class="ib" id="kkb" style="top:2cqw" onclick="kartu(1)" aria-label="Kartu warga">🪪</button>
+<button class="ib" id="sv" style="top:13.5cqw" onclick="saveNow()" aria-label="Simpan data">💾</button>
+<div id="own" aria-hidden="true"></div>
+<div id="pad"><div class="pg"><button class="pb" data-k="u">▲</button><button class="pb" data-k="l">◀</button><button class="pb" data-k="d">▼</button><button class="pb" data-k="r">▶</button></div>
+<div class="pv"><button class="pb" id="kzi" data-k="zi">🔍＋</button><button class="pb" id="kzo" data-k="zo">🔍－</button></div></div>
+<div id="mnu">
+<div class="mh"><b>☰ Menu</b><button class="x" onclick="menu(0)">✕</button></div>
+<details open><summary>💾 Data</summary>
+<button onclick="saveNow()">💾 Simpan Data Sekarang</button>
+<small>Tersimpan otomatis: sumber daya, kas, bangunan, dan warga. Di halaman Claude, data juga disimpan permanen di akun Anda.</small>
+<small id="svt"></small>
+<button onclick="exportKota()">📤 Ekspor Kota (untuk dipublikasikan)</button>
+<button onclick="ownerLogout()">🔓 Keluar dari mode Pak Bani</button>
+<button onclick="resetWargaAsk(this)">🧹 Reset Warga (sisakan Pak Bani)</button>
+<button onclick="resetAsk(this)">↺ Reset Kota</button>
+</details>
+<details><summary>🎥 Kamera</summary>
+<button id="bCam" onclick="setCam(camMode?0:1)"></button>
+<button id="bPad" onclick="padOn=!padOn;updMenu()"></button>
+<button id="ar" onclick="auto=!auto;updMenu()"></button>
+<button id="bFol" onclick="followV=null;follow=!follow;updMenu()"></button>
+<button onclick="resetCam()">🎥 Reset Kamera</button>
+<label class="rg">Kecepatan terbang <b id="spdv">14</b><input id="spd" type="range" min="4" max="60" value="14"></label>
+<small>Free Cam: geser layar = lihat sekeliling • cubit atau scroll = maju/mundur • WASD = gerak • E/Q = naik/turun • tombol arah di layar untuk HP.</small>
+</details>
+<details><summary>⏺ Rekam &amp; Waktu</summary>
+<button id="bRec" onclick="RC?recStop():recStart()"></button>
+<button id="bTod" onclick="todMode=(todMode+1)%3;updMenu()"></button>
+</details>
+<details open><summary>👥 Warga &amp; Event</summary>
+<button onclick="videoWarga()">🎬 Buat Video Warga Baru</button>
+<small>Isi username di bawah dulu (boleh kosong, nanti diacak). Kamera menyorot warga baru yang datang lalu merekamnya jadi video.</small>
+<button id="bCine" onclick="CINE=!CINE;updMenu()"></button>
+<input id="un" maxlength="120" placeholder="Username warga baru (boleh banyak, pisah spasi)">
+<button onclick="addUser()">➕ Tambah Warga</button>
+<button onclick="ev('f',1)">➕ Warga Acak</button>
+<button onclick="ev('l',10)">👍 +10 Like</button>
+<button onclick="ev('s',1)">🔁 +1 Share</button>
+<input id="cm" placeholder="Komentar: rumah, pasar, puskesmas, sekolah, kastil…">
+<button onclick="cmt()">💬 Kirim Komentar</button>
+<button id="dm" onclick="demo()">▶ Mode Demo</button>
+</details>
+<details><summary>🪪 Verifikasi Warga (Instagram)</summary>
+<small>Pemain mendaftar di game, mendapat kode, lalu mengirim kode itu lewat DM Instagram ke Anda. Cek pengirim DM sama dengan username yang didaftarkan, isi di bawah, buat kunci aktivasi, lalu balas DM-nya dengan kunci itu.</small>
+<input id="vu" placeholder="username Instagram pengirim DM" maxlength="31" autocomplete="off">
+<input id="vc" placeholder="kode dari DM (WPL-XXXX-XXXX)" maxlength="14" autocomplete="off">
+<button onclick="verifSetuju()">✅ Buat Kunci Aktivasi &amp; jadikan warga</button>
+<button onclick="ownerKeys()">🔑 Buat / Tampilkan Kunci Verifikasi</button>
+<button onclick="ownerBackup()">💾 Cadangan Kunci Privat</button>
+<input id="kimp" placeholder="Tempel kunci privat (pindah perangkat)" autocomplete="off">
+<button onclick="ownerImport()">📥 Impor Kunci Privat</button>
+<small>Kunci verifikasi cukup dibuat sekali, lalu tempel barisnya ke config.js dan upload ulang.</small>
+</details>
+<details><summary>👷 Pekerjaan Warga</summary>
+<div id="jobs"></div>
+<small>Setiap satu siklus kerja digaji 1 kas. Warga mencari kayu, batu, besi, ikan, dan bata sendiri sesuai bangunan yang sedang dibutuhkan.</small>
+</details>
+</div>
+<div id="kkm"></div>
+<div id="arr"></div>
+<div id="recm"></div>
+<div id="toast"></div>
+</div>
+<script>
+(function(){
+var CDN='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+function L(src,ok,bad){var e=document.createElement('script');e.src=src;e.onload=ok;e.onerror=bad;document.head.appendChild(e)}
+function go(){function g(){L('game.js',null,null)}L('config.js',g,g)}
+function fail(){var h=document.getElementById('hint');h.style.opacity=1;h.innerHTML='⚠️ three.js gagal dimuat.<br>Sambungkan internet sekali (setelah itu tersimpan di cache),<br>atau taruh <b>three.min.js</b> (r128) di folder <b>public/lib/</b>.'}
+function viaCDN(){if(window.THREE)return go();L(CDN,function(){window.THREE?go():fail()},fail)}
+L('lib/three.min.js',viaCDN,viaCDN);
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')==0)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+})();
+</script>
+</body></html>
